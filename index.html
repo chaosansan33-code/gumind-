@@ -1,4 +1,4 @@
-<index.html>
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
@@ -118,6 +118,52 @@
             color: #10B981;
         }
 
+        /* 新增：適合交流區塊樣式 */
+        .match-section {
+            margin: 25px 0 15px 0;
+            padding: 20px 15px;
+            background-color: #FFFDF9;
+            border: 1px dashed #EADBC8;
+            border-radius: 16px;
+        }
+
+        .match-title {
+            font-size: 16px;
+            font-weight: bold;
+            color: #605349;
+            margin-bottom: 15px;
+        }
+
+        .match-flex {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .match-card {
+            flex: 1;
+            max-width: 120px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .match-card img {
+            width: 70px;
+            height: 70px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 2px solid #EADBC8;
+            background-color: #FAF8F5;
+            margin-bottom: 8px;
+        }
+
+        .match-card span {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
         .hidden {
             display: none !important;
         }
@@ -144,7 +190,13 @@
         <p style="font-size: 16px; color: #7A6F64; margin: 0;">你今天的心靈狀態是...</p>
         <div id="result-name" class="result-title"></div>
         <img id="result-image" class="result-img" src="" alt="菇菇結果">
-        <br>
+        
+        <div class="match-section">
+            <div class="match-title">💡 現在適合與誰交流</div>
+            <div id="match-container" class="match-flex">
+                </div>
+        </div>
+
         <button class="start-btn" style="background-color: #8D7B68;" onclick="restartQuiz()">再測一次</button>
     </div>
 </div>
@@ -226,13 +278,13 @@
         }
     };
 
-    // 結果對應設定
+    // 結果與推薦朋友設定
     const mushroomResults = {
-        'A': { name: "珊瑚菇", img: "image_258f84.png" },
-        'B': { name: "玫瑰菇", img: "image_258f8c.png" },
-        'C': { name: "秀珍菇", img: "image_258fa8.png" },
-        'D': { name: "毒菇", img: "image_258fc5.png" },
-        'E': { name: "香菇", img: "image_258fcb.png" }
+        'A': { name: "珊瑚菇", img: "image_258f84.png", friends: ['B', 'D'] },
+        'B': { name: "玫瑰菇", img: "image_258f8c.png", friends: ['A', 'C'] },
+        'C': { name: "秀珍菇", img: "image_258fa8.png", friends: ['B', 'E'] },
+        'D': { name: "毒菇", img: "image_258fc5.png", friends: ['A', 'E'] },
+        'E': { name: "香菇", img: "image_258fcb.png", friends: ['C', 'D'] }
     };
 
     let currentQuestionIndex = 0;
@@ -263,11 +315,9 @@
         document.getElementById('progress').style.width = `${progressPercent}%`;
 
         if (currentQuestionIndex < 6) {
-            // 正常前 6 題
             const currentQuestion = questions[currentQuestionIndex];
             document.getElementById('question-text').innerText = currentQuestion.text;
             
-            // 複製選項並打亂順序
             let shuffledOptions = shuffleArray([...currentQuestion.options]);
             
             const optionsListZone = document.getElementById('options-list');
@@ -281,7 +331,6 @@
                 optionsListZone.appendChild(btn);
             });
         } else {
-            // 前 6 題做完，檢查平手
             checkResults();
         }
     }
@@ -292,13 +341,11 @@
             currentQuestionIndex++;
             showQuestion();
         } else {
-            // 平手題直接決定結果
             showFinalResult(type);
         }
     }
 
     function checkResults() {
-        // 找出最高分
         let maxScore = -1;
         for (let type in scores) {
             if (scores[type] > maxScore) {
@@ -306,7 +353,6 @@
             }
         }
 
-        // 找出得到最高分的菇有哪些
         tieTypes = [];
         for (let type in scores) {
             if (scores[type] === maxScore) {
@@ -315,10 +361,8 @@
         }
 
         if (tieTypes.length === 1) {
-            // 沒有平手，直接出結果
             showFinalResult(tieTypes[0]);
         } else {
-            // 進入平手決勝題 Q7
             isTieBreaking = true;
             document.getElementById('progress').style.width = '95%';
             document.getElementById('question-text').innerText = tieBreakerQuestion.text;
@@ -326,13 +370,11 @@
             const optionsListZone = document.getElementById('options-list');
             optionsListZone.innerHTML = '';
 
-            // 只挑出平手種類的選項
             let tieOptions = [];
             tieTypes.forEach(type => {
                 tieOptions.push({ type: type, text: tieBreakerQuestion.options[type] });
             });
 
-            // 選項一樣隨機打亂
             shuffleArray(tieOptions);
 
             tieOptions.forEach(opt => {
@@ -352,6 +394,32 @@
         const result = mushroomResults[finalType];
         document.getElementById('result-name').innerText = `【 ${result.name} 】`;
         document.getElementById('result-image').src = result.img;
+
+        // 動態生成適合交流的朋友
+        const matchContainer = document.getElementById('match-container');
+        matchContainer.innerHTML = ''; // 清空舊資料
+
+        result.friends.forEach(friendType => {
+            const friendInfo = mushroomResults[friendType];
+            
+            // 建立朋友卡片外殼
+            const card = document.createElement('div');
+            card.className = 'match-card';
+
+            // 建立頭像
+            const img = document.createElement('img');
+            img.src = friendInfo.img;
+            img.alt = friendInfo.name;
+
+            // 建立名字文本
+            const nameSpan = document.createElement('span');
+            nameSpan.innerText = friendInfo.name;
+
+            // 組合並塞入網頁
+            card.appendChild(img);
+            card.appendChild(nameSpan);
+            matchContainer.appendChild(card);
+        });
     }
 
     function restartQuiz() {
