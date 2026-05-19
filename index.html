@@ -279,10 +279,11 @@
             'B': "一個鋪著柔軟花瓣的小角落，旁邊有暖暖的燈光。",
             'C': "一條有小腳印的森林步道，好像有人正在前面等你一起走。",
             'D': "一棵很大的樹洞裡，外面很熱鬧，但裡面剛好安靜。",
-            'E': "一張擺滿熱湯、點心和小碗盤的野餐桌旁."
+            'E': "一張擺滿熱湯、點心和小碗盤的野餐桌旁。"
         }
     };
 
+    // 格式確認：全部圖片皆使用 .png 格式
     const mushroomResults = {
         'A': { name: "珊瑚菇", img: "image_258f84.png", friends: ['B', 'D'] },
         'B': { name: "玫瑰菇", img: "image_258f8c.png", friends: ['A', 'C'] },
@@ -398,7 +399,7 @@
         document.getElementById('result-name').innerText = `【 ${result.name} 】`;
         document.getElementById('result-image').src = result.img;
 
-        // 直接用最單純的 DOM 賦值，不透過迴圈動態建立，防止被任何系統機制阻擋
+        // 將對應的朋友資料塞進指定的 HTML 欄位中
         const friend1 = mushroomResults[result.friends[0]];
         const friend2 = mushroomResults[result.friends[1]];
 
