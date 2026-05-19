@@ -118,7 +118,6 @@
             color: #10B981;
         }
 
-        /* 新增：適合交流區塊樣式 */
         .match-section {
             margin: 25px 0 15px 0;
             padding: 20px 15px;
@@ -193,8 +192,16 @@
         
         <div class="match-section">
             <div class="match-title">💡 現在適合與誰交流</div>
-            <div id="match-container" class="match-flex">
+            <div class="match-flex">
+                <div class="match-card">
+                    <img id="friend-img-1" src="" alt="朋友1">
+                    <span id="friend-name-1"></span>
                 </div>
+                <div class="match-card">
+                    <img id="friend-img-2" src="" alt="朋友2">
+                    <span id="friend-name-2"></span>
+                </div>
+            </div>
         </div>
 
         <button class="start-btn" style="background-color: #8D7B68;" onclick="restartQuiz()">再測一次</button>
@@ -202,7 +209,6 @@
 </div>
 
 <script>
-    // 原始題目數據 (A:珊瑚, B:玫瑰, C:秀珍, D:毒菇, E:香菇)
     const questions = [
         {
             text: "Q1. 今天來到這裡，你最想要的是？",
@@ -266,7 +272,6 @@
         }
     ];
 
-    // Q7 平手決勝題對應庫
     const tieBreakerQuestion = {
         text: "Q7. 如果你走進一座菇菇森林，你最想停在哪個地方？",
         options: {
@@ -274,17 +279,16 @@
             'B': "一個鋪著柔軟花瓣的小角落，旁邊有暖暖的燈光。",
             'C': "一條有小腳印的森林步道，好像有人正在前面等你一起走。",
             'D': "一棵很大的樹洞裡，外面很熱鬧，但裡面剛好安靜。",
-            'E': "一張擺滿熱湯、點心和小碗盤的野餐桌旁。"
+            'E': "一張擺滿熱湯、點心和小碗盤的野餐桌旁."
         }
     };
 
-    // 結果與推薦朋友設定
     const mushroomResults = {
-        'A': { name: "珊瑚菇", img: "image_258f84.png", friends: ['B', 'D'] },
-        'B': { name: "玫瑰菇", img: "image_258f8c.png", friends: ['A', 'C'] },
-        'C': { name: "秀珍菇", img: "image_258fa8.png", friends: ['B', 'E'] },
-        'D': { name: "毒菇", img: "image_258fc5.png", friends: ['A', 'E'] },
-        'E': { name: "香菇", img: "image_258fcb.png", friends: ['C', 'D'] }
+        'A': { name: "珊瑚菇", img: "image_258f84.jpg", friends: ['B', 'D'] },
+        'B': { name: "玫瑰菇", img: "image_258f8c.jpg", friends: ['A', 'C'] },
+        'C': { name: "秀珍菇", img: "image_258fa8.jpg", friends: ['B', 'E'] },
+        'D': { name: "毒菇", img: "image_258fc5.jpg", friends: ['A', 'E'] },
+        'E': { name: "香菇", img: "image_258fcb.jpg", friends: ['C', 'D'] }
     };
 
     let currentQuestionIndex = 0;
@@ -292,7 +296,6 @@
     let isTieBreaking = false;
     let tieTypes = [];
 
-    // 隨機打亂陣列的函式
     function shuffleArray(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -395,31 +398,15 @@
         document.getElementById('result-name').innerText = `【 ${result.name} 】`;
         document.getElementById('result-image').src = result.img;
 
-        // 動態生成適合交流的朋友
-        const matchContainer = document.getElementById('match-container');
-        matchContainer.innerHTML = ''; // 清空舊資料
+        // 直接用最單純的 DOM 賦值，不透過迴圈動態建立，防止被任何系統機制阻擋
+        const friend1 = mushroomResults[result.friends[0]];
+        const friend2 = mushroomResults[result.friends[1]];
 
-        result.friends.forEach(friendType => {
-            const friendInfo = mushroomResults[friendType];
-            
-            // 建立朋友卡片外殼
-            const card = document.createElement('div');
-            card.className = 'match-card';
+        document.getElementById('friend-img-1').src = friend1.img;
+        document.getElementById('friend-name-1').innerText = friend1.name;
 
-            // 建立頭像
-            const img = document.createElement('img');
-            img.src = friendInfo.img;
-            img.alt = friendInfo.name;
-
-            // 建立名字文本
-            const nameSpan = document.createElement('span');
-            nameSpan.innerText = friendInfo.name;
-
-            // 組合並塞入網頁
-            card.appendChild(img);
-            card.appendChild(nameSpan);
-            matchContainer.appendChild(card);
-        });
+        document.getElementById('friend-img-2').src = friend2.img;
+        document.getElementById('friend-name-2').innerText = friend2.name;
     }
 
     function restartQuiz() {
