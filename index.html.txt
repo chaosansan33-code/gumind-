@@ -1,0 +1,364 @@
+<index.html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>靈感菇心理測驗</title>
+    <style>
+        :root {
+            --primary-color: #8D7B68;
+            --bg-color: #FAF8F5;
+            --card-bg: #FFFFFF;
+            --text-color: #4A3F35;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Arial, 'Noto Sans TC', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 8px 24px rgba(141, 123, 104, 0.15);
+            padding: 30px;
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #605349;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background-color: #EADBC8;
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: #10B981;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 25px;
+            line-height: 1.5;
+        }
+
+        .options-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background-color: #FFFDF9;
+            border: 2px solid #EADBC8;
+            border-radius: 12px;
+            padding: 15px 20px;
+            font-size: 16px;
+            color: var(--text-color);
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease;
+            line-height: 1.4;
+        }
+
+        .option-btn:hover {
+            background-color: #F8F1E5;
+            border-color: var(--primary-color);
+        }
+
+        .start-btn {
+            background-color: #10B981;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 40px;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+            margin-top: 20px;
+        }
+
+        .start-btn:hover {
+            background-color: #059669;
+        }
+
+        .result-img {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .result-title {
+            font-size: 28px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #10B981;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="quiz-container">
+    <div id="start-page">
+        <h1>🍄 靈感菇心理測驗 🍄</h1>
+        <p style="margin-bottom: 30px; color: #7A6F64;">憑直覺回答幾個問題，看看你今天是什麼菇？</p>
+        <button class="start-btn" onclick="startQuiz()">開始測驗</button>
+    </div>
+
+    <div id="quiz-page" class="hidden">
+        <div class="progress-bar">
+            <div id="progress" class="progress"></div>
+        </div>
+        <div id="question-text" class="question-text">題目載入中...</div>
+        <div id="options-list" class="options-list"></div>
+    </div>
+
+    <div id="result-page" class="hidden">
+        <p style="font-size: 16px; color: #7A6F64; margin: 0;">你今天的心靈狀態是...</p>
+        <div id="result-name" class="result-title"></div>
+        <img id="result-image" class="result-img" src="" alt="菇菇結果">
+        <br>
+        <button class="start-btn" style="background-color: #8D7B68;" onclick="restartQuiz()">再測一次</button>
+    </div>
+</div>
+
+<script>
+    // 原始題目數據 (A:珊瑚, B:玫瑰, C:秀珍, D:毒菇, E:香菇)
+    const questions = [
+        {
+            text: "Q1. 今天來到這裡，你最想要的是？",
+            options: [
+                { type: 'A', text: "一點安靜的空間，讓自己慢慢沉澱" },
+                { type: 'B', text: "被溫柔地接住，好好照顧自己" },
+                { type: 'C', text: "有人陪我一起，不用一個人待著" },
+                { type: 'D', text: "低調參與就好，今天不想太社交" },
+                { type: 'E', text: "吃飯、放鬆、開心一下就好" }
+            ]
+        },
+        {
+            text: "Q2. 你今天的能量狀態比較像？",
+            options: [
+                { type: 'A', text: "慢慢漂浮，想放空" },
+                { type: 'B', text: "有點敏感，想被溫柔對待" },
+                { type: 'C', text: "想動起來，但需要有人陪" },
+                { type: 'D', text: "電量偏低，不想被打擾太多" },
+                { type: 'E', text: "還不錯，想輕鬆吃點東西" }
+            ]
+        },
+        {
+            text: "Q3. 做手作時，你最喜歡哪種感覺？",
+            options: [
+                { type: 'A', text: "安安靜靜自己慢慢做" },
+                { type: 'B', text: "做出一個療癒又漂亮的小東西" },
+                { type: 'C', text: "跟旁邊的人一起討論、互相幫忙" },
+                { type: 'D', text: "不用一直講話，讓我默默完成" },
+                { type: 'E', text: "邊吃邊做，輕鬆好玩就好" }
+            ]
+        },
+        {
+            text: "Q4. 如果現在有人問你「你還好嗎？」你最想回答？",
+            options: [
+                { type: 'A', text: "我想靜一下，但我還在" },
+                { type: 'B', text: "我想對自己好一點" },
+                { type: 'C', text: "我想要有人陪我一下" },
+                { type: 'D', text: "我今天社交電量真的不高" },
+                { type: 'E', text: "我很好，我只是來吃飯放鬆的" }
+            ]
+        },
+        {
+            text: "Q5. 你最想收到哪一句話？",
+            options: [
+                { type: 'A', text: "你可以慢慢來，不用急" },
+                { type: 'B', text: "今天也要溫柔地抱抱自己" },
+                { type: 'C', text: "我陪你，我們一起走" },
+                { type: 'D', text: "你不用勉強自己很外向" },
+                { type: 'E', text: "先吃飽，其他等一下再說" }
+            ]
+        },
+        {
+            text: "Q6. 如果你是一朵菇，你今天會躲在哪裡？",
+            options: [
+                { type: 'A', text: "水邊安靜漂著" },
+                { type: 'B', text: "柔軟花叢裡休息" },
+                { type: 'C', text: "小路旁等朋友一起出發" },
+                { type: 'D', text: "樹蔭下省電模式" },
+                { type: 'E', text: "餐桌旁邊等開飯" }
+            ]
+        }
+    ];
+
+    // Q7 平手決勝題對應庫
+    const tieBreakerQuestion = {
+        text: "Q7. 如果你走進一座菇菇森林，你最想停在哪個地方？",
+        options: {
+            'A': "一片會發光的淺水池旁，什麼都不用做，只看著水面慢慢晃動。",
+            'B': "一個鋪著柔軟花瓣的小角落，旁邊有暖暖的燈光。",
+            'C': "一條有小腳印的森林步道，好像有人正在前面等你一起走。",
+            'D': "一棵很大的樹洞裡，外面很熱鬧，但裡面剛好安靜。",
+            'E': "一張擺滿熱湯、點心和小碗盤的野餐桌旁。"
+        }
+    };
+
+    // 結果對應設定
+    const mushroomResults = {
+        'A': { name: "珊瑚菇", img: "image_258f84.jpg" },
+        'B': { name: "玫瑰菇", img: "image_258f8c.jpg" },
+        'C': { name: "秀珍菇", img: "image_258fa8.jpg" },
+        'D': { name: "毒菇", img: "image_258fc5.jpg" },
+        'E': { name: "香菇", img: "image_258fcb.jpg" }
+    };
+
+    let currentQuestionIndex = 0;
+    let scores = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+    let isTieBreaking = false;
+    let tieTypes = [];
+
+    // 隨機打亂陣列的函式
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function startQuiz() {
+        document.getElementById('start-page').classList.add('hidden');
+        document.getElementById('quiz-page').classList.remove('hidden');
+        currentQuestionIndex = 0;
+        scores = { A: 0, B: 0, C: 0, D: 0, E: 0 };
+        isTieBreaking = false;
+        showQuestion();
+    }
+
+    function showQuestion() {
+        const progressPercent = ((currentQuestionIndex) / 6) * 100;
+        document.getElementById('progress').style.width = `${progressPercent}%`;
+
+        if (currentQuestionIndex < 6) {
+            // 正常前 6 題
+            const currentQuestion = questions[currentQuestionIndex];
+            document.getElementById('question-text').innerText = currentQuestion.text;
+            
+            // 複製選項並打亂順序
+            let shuffledOptions = shuffleArray([...currentQuestion.options]);
+            
+            const optionsListZone = document.getElementById('options-list');
+            optionsListZone.innerHTML = '';
+            
+            shuffledOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt.text;
+                btn.onclick = () => handleAnswer(opt.type);
+                optionsListZone.appendChild(btn);
+            });
+        } else {
+            // 前 6 題做完，檢查平手
+            checkResults();
+        }
+    }
+
+    function handleAnswer(type) {
+        if (!isTieBreaking) {
+            scores[type]++;
+            currentQuestionIndex++;
+            showQuestion();
+        } else {
+            // 平手題直接決定結果
+            showFinalResult(type);
+        }
+    }
+
+    function checkResults() {
+        // 找出最高分
+        let maxScore = -1;
+        for (let type in scores) {
+            if (scores[type] > maxScore) {
+                maxScore = scores[type];
+            }
+        }
+
+        // 找出得到最高分的菇有哪些
+        tieTypes = [];
+        for (let type in scores) {
+            if (scores[type] === maxScore) {
+                tieTypes.push(type);
+            }
+        }
+
+        if (tieTypes.length === 1) {
+            // 沒有平手，直接出結果
+            showFinalResult(tieTypes[0]);
+        } else {
+            // 進入平手決勝題 Q7
+            isTieBreaking = true;
+            document.getElementById('progress').style.width = '95%';
+            document.getElementById('question-text').innerText = tieBreakerQuestion.text;
+
+            const optionsListZone = document.getElementById('options-list');
+            optionsListZone.innerHTML = '';
+
+            // 只挑出平手種類的選項
+            let tieOptions = [];
+            tieTypes.forEach(type => {
+                tieOptions.push({ type: type, text: tieBreakerQuestion.options[type] });
+            });
+
+            // 選項一樣隨機打亂
+            shuffleArray(tieOptions);
+
+            tieOptions.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = 'option-btn';
+                btn.innerText = opt.text;
+                btn.onclick = () => handleAnswer(opt.type);
+                optionsListZone.appendChild(btn);
+            });
+        }
+    }
+
+    function showFinalResult(finalType) {
+        document.getElementById('quiz-page').classList.add('hidden');
+        document.getElementById('result-page').classList.remove('hidden');
+
+        const result = mushroomResults[finalType];
+        document.getElementById('result-name').innerText = `【 ${result.name} 】`;
+        document.getElementById('result-image').src = result.img;
+    }
+
+    function restartQuiz() {
+        document.getElementById('result-page').classList.add('hidden');
+        document.getElementById('start-page').classList.remove('hidden');
+    }
+</script>
+
+</body>
+</html>
